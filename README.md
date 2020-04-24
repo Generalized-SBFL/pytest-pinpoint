@@ -1,4 +1,4 @@
-# Generalized-Fault-Localization
+# Pytest-PinPoint
 A pytest plugin which runs SBFL algorithms to detect faults.
 
 First five algorithms are based on what Spencer Pearson, José Campos, René Just, Gordon Fraser, Rui Abreu, Michael D. Ernst, Deric Pang, Benjamin Keller discribed in [Evaluating and improving fault localization](https://homes.cs.washington.edu/~rjust/publ/fault_localization_effectiveness_icse_2017.pdf).
@@ -14,5 +14,5 @@ Pearson, S., Campos, J., Just, R., Fraser, G., Abreu, R., Ernst, M. D., ... & Ke
 `pip install coverage>=5.1`
 
 #### run pytest-pinpoint
-
+P
 `python -m pytest --cov=. --cov-context --cov-branch --pinpoint`
