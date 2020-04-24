@@ -124,7 +124,10 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             else:
                 Tarantula = (line_info["failed times"] / totalfailed_num) / ((line_info["failed times"] / totalfailed_num) + (line_info["passed times"] / totalpassed_num))
             print("Tarantula Score:", Tarantula)
-            Ochiai = (line_info["failed times"] / math.sqrt(totalfailed_num * total_times))
+            if totalfailed_num == 0:
+                Ochiai = 0
+            else:
+                Ochiai = (line_info["failed times"] / math.sqrt(totalfailed_num * total_times))
             print("Ochiai Score:",Ochiai)
             Op2 = line_info["failed times"] - line_info["passed times"] / (totalpassed_num + 1)
             if Op2 > 0:

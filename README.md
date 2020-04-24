@@ -12,3 +12,7 @@ Pearson, S., Campos, J., Just, R., Fraser, G., Abreu, R., Ernst, M. D., ... & Ke
 `pip install git+https://github.com/nedbat/pytest-cov.git@nedbat/contexts`
 
 `pip install coverage>=5.1`
+
+#### run pytest-pinpoint
+
+`python -m pytest --cov=. --cov-context --cov-branch --pinpoint`
