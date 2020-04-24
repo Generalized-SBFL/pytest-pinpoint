@@ -1,4 +1,6 @@
 # Pytest-PinPoint
+[![PyPI version](https://img.shields.io/pypi/v/pytest-pinpoint.svg)](https://pypi.org/project/pytest-pinpoint/)
+
 A pytest plugin which runs SBFL algorithms to detect faults.
 
 First five algorithms are based on what Spencer Pearson, José Campos, René Just, Gordon Fraser, Rui Abreu, Michael D. Ernst, Deric Pang, Benjamin Keller discribed in [Evaluating and improving fault localization](https://homes.cs.washington.edu/~rjust/publ/fault_localization_effectiveness_icse_2017.pdf).
