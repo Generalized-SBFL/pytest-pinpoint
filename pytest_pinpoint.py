@@ -15,7 +15,15 @@ def pytest_addoption(parser):
     group.addoption(
         "--pinpoint",
         action="store_true",
-        help="pytest-pinpoint help \n--pinpoint: analyze branch coverage to detect faults",
+        help="pytest-pinpoint help \n--pinpoint: analyze branch coverage to detect faults, show top three ranked results \n--show_all: show all ranked results \n--show_last_three: show bottom three ranked results",
+    )
+    group.addoption(
+        "--show_all",
+        action="store_true",
+    )
+    group.addoption(
+        "--show_last_three",
+        action="store_true",
     )
 
 
@@ -28,7 +36,7 @@ def rank(data, key):
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
     """Generate terminal report for pytest-pinpoint"""
     # collect pass fail stats
-    terminalreporter.section('Pytest PinPoint Data Collection')
+    terminalreporter.section('Pytest PinPoint')
     failures = [[report.nodeid, []]
                 for report in terminalreporter.stats.get('failed', [])]
     passes = [[report.nodeid, []]
@@ -105,44 +113,45 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
     scores = []
     for file in files:
         file_scores = []
-        print("——————————————————————————")
+        # print("——————————————————————————")
         # Count total executed lines in a file
         for measured_file in measured_files:
             if file[0] in measured_file:
                 totalnum = len(covdb.lines(measured_file))
         # Calculate scores for each line
         for line_info in file[1:]:
-            print("File:", file[0])
-            print("Line:", line_info["line"])
+            # print("File:", file[0])
+            # print("Line:", line_info["line"])
             total_times = 0
             total_times = line_info["passed times"] + line_info["failed times"]
-            print("Failed:", line_info["failed times"])
-            print("Passed:", line_info["passed times"])
-            print("Tested:", total_times)
+            # print("Failed:", line_info["failed times"])
+            # print("Passed:", line_info["passed times"])
+            # print("Tested:", total_times)
             if totalfailed_num == 0 or totalpassed_num == 0:
                 Tarantula = 0
             else:
                 Tarantula = (line_info["failed times"] / totalfailed_num) / ((line_info["failed times"] / totalfailed_num) + (line_info["passed times"] / totalpassed_num))
-            print("Tarantula Score:", Tarantula)
+            # print("Tarantula Score:", Tarantula)
             if totalfailed_num == 0:
                 Ochiai = 0
             else:
                 Ochiai = (line_info["failed times"] / math.sqrt(totalfailed_num * total_times))
-            print("Ochiai Score:",Ochiai)
+            # print("Ochiai Score:",Ochiai)
             Op2 = line_info["failed times"] - line_info["passed times"] / (totalpassed_num + 1)
             if Op2 > 0:
-                print("Op2 Score", Op2)
+                Op2 = Op2
+                # print("Op2 Score", Op2)
             else:
                 Op2 = 0
-                print("Op2 Score", Op2)
+                # print("Op2 Score", Op2)
             Barinel = 1 - line_info["passed times"] / total_times
-            print("Barinel Score", Barinel)
+            # print("Barinel Score", Barinel)
             if line_info["failed times"] > 0:
                 DStar = 2 / (line_info["passed times"] + totalfailed_num - line_info["failed times"])
             else:
                 DStar = 0
-            print("DStar Score", DStar)
-            print("——————————————————————————")
+            # print("DStar Score", DStar)
+            # print("——————————————————————————")
             file_scores.append({"total": totalnum, "file": file[0], "line": line_info["line"], "Tarantula": Tarantula, "Ochiai": Ochiai, "Op2": Op2, "Barinel": Barinel, "DStar": DStar})
         scores.append(file_scores)
     # Rank scores
@@ -165,16 +174,57 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             line_score["DStar_rank"] = DStar_rank[count]
             line_score["DStar_exam"] = DStar_rank[count] / line_score["total"]
             count = count + 1
-            print("___________________")
-            print("File:", line_score.get("file"))
-            print("Line:", line_score.get("line"))
-            print("Tarantula_rank num:", line_score.get("Tarantula_rank"))
-            print("Tarantula_exam num:", line_score.get("Tarantula_exam"))
-            print("Ochiai_rank num:", line_score.get("Ochiai_rank"))
-            print("Ochiai_exam num:", line_score.get("Ochiai_exam"))
-            print("Op2_rank num:", line_score.get("Op2_rank"))
-            print("Op2_exam num:", line_score.get("Op2_exam"))
-            print("Barinel_rank num:", line_score.get("Barinel_rank"))
-            print("Barinel_exam num:", line_score.get("Barinel_exam"))
-            print("DStar_rank num:", line_score.get("DStar_rank"))
-            print("DStar_exam num:", line_score.get("DStar_exam"))
+        if config.getoption("show_all"):
+            terminalreporter.section('Pytest PinPoint-Show All')
+            for line_score in file_scores:
+                print("___________________")
+                print("File:", line_score.get("file"))
+                print("Line:", line_score.get("line"))
+                print("Tarantula_rank num:", line_score.get("Tarantula_rank"))
+                print("Tarantula_exam num:", line_score.get("Tarantula_exam"))
+                print("Ochiai_rank num:", line_score.get("Ochiai_rank"))
+                print("Ochiai_exam num:", line_score.get("Ochiai_exam"))
+                print("Op2_rank num:", line_score.get("Op2_rank"))
+                print("Op2_exam num:", line_score.get("Op2_exam"))
+                print("Barinel_rank num:", line_score.get("Barinel_rank"))
+                print("Barinel_exam num:", line_score.get("Barinel_exam"))
+                print("DStar_rank num:", line_score.get("DStar_rank"))
+                print("DStar_exam num:", line_score.get("DStar_exam"))
+        else:
+            terminalreporter.section('Pytest PinPoint-Show Top Three')
+            for line_score in file_scores:
+                rank_list = [line_score.get("Tarantula_rank"), line_score.get("Ochiai_rank"), line_score.get("Op2_rank"),
+                            line_score.get("Barinel_rank"), line_score.get("DStar_rank")]
+                if any(rank in (1, 2, 3) for rank in rank_list):
+                    print("___________________")
+                    print("File:", line_score.get("file"))
+                    print("Line:", line_score.get("line"))
+                    print("Tarantula_rank num:", line_score.get("Tarantula_rank"))
+                    print("Tarantula_exam num:", line_score.get("Tarantula_exam"))
+                    print("Ochiai_rank num:", line_score.get("Ochiai_rank"))
+                    print("Ochiai_exam num:", line_score.get("Ochiai_exam"))
+                    print("Op2_rank num:", line_score.get("Op2_rank"))
+                    print("Op2_exam num:", line_score.get("Op2_exam"))
+                    print("Barinel_rank num:", line_score.get("Barinel_rank"))
+                    print("Barinel_exam num:", line_score.get("Barinel_exam"))
+                    print("DStar_rank num:", line_score.get("DStar_rank"))
+                    print("DStar_exam num:", line_score.get("DStar_exam"))
+            if config.getoption("show_last_three"):
+                terminalreporter.section('Pytest PinPoint-Show Bottom Three')
+                for line_score in file_scores:
+                    rank_list = [line_score.get("Tarantula_rank"), line_score.get("Ochiai_rank"), line_score.get("Op2_rank"),
+                                line_score.get("Barinel_rank"), line_score.get("DStar_rank")]
+                    if any(rank in (count - 3, count - 2, count - 1) for rank in rank_list):
+                        print("___________________")
+                        print("File:", line_score.get("file"))
+                        print("Line:", line_score.get("line"))
+                        print("Tarantula_rank num:", line_score.get("Tarantula_rank"))
+                        print("Tarantula_exam num:", line_score.get("Tarantula_exam"))
+                        print("Ochiai_rank num:", line_score.get("Ochiai_rank"))
+                        print("Ochiai_exam num:", line_score.get("Ochiai_exam"))
+                        print("Op2_rank num:", line_score.get("Op2_rank"))
+                        print("Op2_exam num:", line_score.get("Op2_exam"))
+                        print("Barinel_rank num:", line_score.get("Barinel_rank"))
+                        print("Barinel_exam num:", line_score.get("Barinel_exam"))
+                        print("DStar_rank num:", line_score.get("DStar_rank"))
+                        print("DStar_exam num:", line_score.get("DStar_exam"))

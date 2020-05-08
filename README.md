@@ -16,5 +16,15 @@ Pearson, S., Campos, J., Just, R., Fraser, G., Abreu, R., Ernst, M. D., ... & Ke
 `pip install coverage>=5.1`
 
 #### run pytest-pinpoint
-P
+
+General usage, top three ranked results:
+
 `python -m pytest --cov=. --cov-context --cov-branch --pinpoint`
+
+Show all ranked results:
+
+`python -m pytest --cov=. --cov-context --cov-branch --pinpoint --show_all`
+
+Show bottom three ranked results:
+
+`python -m pytest --cov=. --cov-context --cov-branch --pinpoint --show_last_three`
