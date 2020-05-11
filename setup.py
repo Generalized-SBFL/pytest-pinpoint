@@ -15,7 +15,7 @@ def read(filename):
 
 setup(
     name="pytest-pinpoint",
-    version="0.2.1",
+    version="0.2.2",
     description="A pytest plugin which runs SBFL algorithms to detect faults.",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",

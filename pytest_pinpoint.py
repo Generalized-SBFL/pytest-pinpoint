@@ -150,10 +150,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
                 # print("Op2 Score", Op2)
             Barinel = 1 - line_info["passed times"] / total_times
             # print("Barinel Score", Barinel)
-            if line_info["failed times"] > 0:
-                DStar = 2 / (line_info["passed times"] + totalfailed_num - line_info["failed times"])
-            else:
-                DStar = 0
+            DStar = line_info["failed times"] ** 2 / (line_info["passed times"] + totalfailed_num - line_info["failed times"])
             # print("DStar Score", DStar)
             # print("——————————————————————————")
             file_scores.append({"total": totalnum, "file": line_info["file"], "line": line_info["line"], "Tarantula": Tarantula, "Ochiai": Ochiai, "Op2": Op2, "Barinel": Barinel, "DStar": DStar})
