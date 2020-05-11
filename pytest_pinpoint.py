@@ -37,9 +37,9 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
     """Generate terminal report for pytest-pinpoint"""
     # collect pass fail stats
     terminalreporter.section('Pytest PinPoint')
-    failures = [[report.nodeid, []]
+    failures = [[report.nodeid, [], []]
                 for report in terminalreporter.stats.get('failed', [])]
-    passes = [[report.nodeid, []]
+    passes = [[report.nodeid, [], []]
                 for report in terminalreporter.stats.get('passed', [])]
     # print("failed ", len(failures), "times", failures)
     # print("passed ", len(passes), "times", passes)
@@ -62,9 +62,13 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
                         for failed_context in failures:
                             if failed_context[0] in context:
                                 failed_context[1].append(abs(key))
+                                if measured_f not in failed_context[2]:
+                                    failed_context[2].append(measured_f)
                         for passed_context in passes:
                             if passed_context[0] in context:
                                 passed_context[1].append(abs(key))
+                                if measured_f not in passed_context[2]:
+                                    passed_context[2].append(measured_f)
     # print("failures")
     # print(failures)
     # print("passes")
@@ -87,7 +91,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             if file[0] in failed_context[0].split('::')[0]:
                 for line in failed_context[1]:
                     if not any(line_info["line"] == line for line_info in file[1:]):
-                        file.append({"line": line, "failed times": 1, "passed times": 0})
+                        file.append({"file": failed_context[2][0], "line": line, "failed times": 1, "passed times": 0})
                     else:
                         for line_info in file[1:]:
                             if line_info["line"] is line:
@@ -97,7 +101,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             if file[0] in passed_context[0].split('::')[0]:
                 for line in passed_context[1]:
                     if not any(line_info["line"] == line for line_info in file[1:]):
-                        file.append({"line": line, "failed times": 0, "passed times": 1})
+                        file.append({"file": passed_context[2][0], "line": line, "failed times": 0, "passed times": 1})
                     else:
                         for line_info in file[1:]:
                             if line_info["line"] is line:
@@ -120,7 +124,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
                 totalnum = len(covdb.lines(measured_file))
         # Calculate scores for each line
         for line_info in file[1:]:
-            # print("File:", file[0])
+            # print("File:", line_info["file"])
             # print("Line:", line_info["line"])
             total_times = 0
             total_times = line_info["passed times"] + line_info["failed times"]
@@ -152,7 +156,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
                 DStar = 0
             # print("DStar Score", DStar)
             # print("——————————————————————————")
-            file_scores.append({"total": totalnum, "file": file[0], "line": line_info["line"], "Tarantula": Tarantula, "Ochiai": Ochiai, "Op2": Op2, "Barinel": Barinel, "DStar": DStar})
+            file_scores.append({"total": totalnum, "file": line_info["file"], "line": line_info["line"], "Tarantula": Tarantula, "Ochiai": Ochiai, "Op2": Op2, "Barinel": Barinel, "DStar": DStar})
         scores.append(file_scores)
     # Rank scores
     for file_scores in scores:
