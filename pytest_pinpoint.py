@@ -7,6 +7,7 @@ import os
 import sys
 import math
 import pytest
+import pandas
 
 
 def pytest_addoption(parser):
@@ -23,6 +24,10 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--show_last_three",
+        action="store_true",
+    )
+    group.addoption(
+        "--save",
         action="store_true",
     )
 
@@ -191,6 +196,26 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
                 print("Barinel_exam num:", line_score.get("Barinel_exam"))
                 print("DStar_rank num:", line_score.get("DStar_rank"))
                 print("DStar_exam num:", line_score.get("DStar_exam"))
+                if config.getoption("save"):
+                    df = pd.DataFrame(
+                        {
+                            "File": line_score.get("file"),
+                            "Line": line_score.get("line"),
+                            "Tarantula_rank_num": line_score.get("Tarantula_rank"),
+                            "Tarantula_exam_num": line_score.get("Tarantula_exam"),
+                            "Ochiai_rank_num": line_score.get("Ochiai_rank"),
+                            "Ochiai_exam_num": line_score.get("Ochiai_exam"),
+                            "Op2_rank_num": line_score.get("Op2_rank"),
+                            "Op2_exam_num": line_score.get("Op2_exam"),
+                            "Barinel_rank_num": line_score.get("Barinel_rank"),
+                            "Barinel_exam_num": line_score.get("Barinel_exam"),
+                            "DStar_rank_num": line_score.get("DStar_rank"),
+                            "DStar_exam_num": line_score.get("DStar_exam"),
+                        },
+                        index=[1],
+                    )
+                    fpath = original_dir = os.path.join(os.sep, os.getcwd(), "pinpoint_res.csv")
+                    df.to_csv(fpath, index=False, header=False, mode="a")
         else:
             terminalreporter.section('Pytest PinPoint-Show Top Three')
             for line_score in file_scores:
